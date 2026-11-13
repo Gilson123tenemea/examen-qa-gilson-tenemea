@@ -1,0 +1,57 @@
+CONCLUSIONES - PRUEBA DE CARGA DEL SERVICIO DE LOGIN (FAKESTOREAPI)
+
+
+1. ESCENARIO EJECUTADO
+  - Servicio: POST https://fakestoreapi.com/auth/login
+  - 50 usuarios virtuales, ramp-up de 30 s, duracion total de 240 s.
+  - Constant Throughput Timer: 1500 peticiones por minuto (objetivo 25 TPS).
+  - Credenciales leidas de data/usuarios.csv (5 usuarios en ciclo).
+  - Herramienta: Apache JMeter 5.6.3, Java 21.0.13, ejecucion por consola.
+  - Validaciones por peticion: codigo 201, existencia de $.token y duracion
+    maxima de 1500 ms.
+
+2. RESULTADOS
+  - Peticiones totales: 5971
+  - Errores: 0 (0,00 %)
+  - Throughput: 24,86 peticiones por segundo
+  - Tiempo de respuesta: minimo 313 ms | promedio 352 ms | mediana 341 ms
+  - Percentiles: p90 = 391 ms | p95 = 431 ms | p99 = 494 ms
+  - Tiempo maximo: 1190 ms
+
+3. VERIFICACION DE CRITERIOS
+  - Al menos 20 TPS: CUMPLE (24,86 TPS sostenidos, 24 % sobre el minimo exigido).
+  - Tiempo de respuesta maximo de 1,5 s: CUMPLE (maximo 1190 ms; el 99 % de las
+    peticiones respondio en menos de 494 ms).
+  - Tasa de error menor al 3 %: CUMPLE (0 %).
+
+4. HALLAZGOS
+  - El servicio respondio de forma estable: el 99 % de las peticiones quedo por
+    debajo de 0,5 s, muy lejos del limite de 1,5 s.
+  - El maximo (1190 ms) esta muy por encima del p99 (494 ms). Es un valor aislado;
+    probablemente corresponde al establecimiento inicial de conexiones (saludo TLS),
+    ya que en una prueba previa de depuracion la primera peticion tardo 1654 ms,
+    de los cuales 851 ms fueron de conexion. Esta causa es una hipotesis y no se
+    verifico en esta prueba.
+  - El login exitoso responde 201 Created con un JSON {"token": "..."}.
+  - El throughput real (24,86) quedo ligeramente por debajo del objetivo del timer
+    (25), diferencia atribuible al ramp-up de 30 s al inicio de la prueba.
+
+5. CONSIDERACIONES
+  - La prueba se ejecuto desde un solo equipo y una sola red; los tiempos incluyen la
+    latencia de red hacia el servidor y pueden variar desde otra ubicacion.
+  - FakeStoreAPI es un servicio publico de demostracion y compartido. Sus resultados
+    no son extrapolables a un servicio real en produccion.
+  - Solo se usaron 5 usuarios distintos, reutilizados en ciclo; no se mide el
+    comportamiento con una gran variedad de credenciales.
+  - Una peticion mas lenta de 1,5 s se habria contado como error. Esta definicion
+    hace que el criterio de error cubra tambien el tiempo de respuesta.
+  - La prueba solo valida el camino exitoso; no incluye credenciales invalidas.
+
+6. RECOMENDACIONES
+  - Repetir la prueba en distintos horarios para observar la variabilidad del servicio.
+  - Hacer una prueba escalonada (subir el TPS por etapas) para encontrar el punto
+    donde empiezan a degradarse los tiempos de respuesta.
+  - Agregar una prueba de resistencia de mayor duracion para detectar degradacion
+    progresiva.
+  - Medir tambien el lado del servidor (CPU, memoria) si se tiene acceso.
+  - Ejecutar la prueba en un pipeline de CI para comparar resultados entre versiones.

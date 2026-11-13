@@ -1,0 +1,35 @@
+CONCLUSIONES - EJERCICIO 1 (E2E DEMOBLAZE)
+
+1. RESULTADO DE LA EJECUCION
+  - Escenarios ejecutados: [N]   Pasados: [N]   Fallidos: [N]
+  - Tiempo aproximado por escenario: [X] segundos
+  - Ejecuciones realizadas: [N] (estables / con fallos intermitentes)
+
+2. HALLAZGOS SOBRE LA APLICACION
+  - [Confirmar] Al agregar un producto, el sitio muestra una alerta JavaScript
+    que debe aceptarse antes de continuar.
+  - [Confirmar] El carrito se carga de forma asincrona; fue necesario esperar a que
+    aparezcan las filas antes de validar.
+  - [Confirmar] El modal de compra no valida los campos obligatorios mas alla de
+    Name y Credit card.
+  - [Agregar] Cualquier otro comportamiento raro que hayas visto
+    (tiempos de respuesta, mensajes, datos del detalle de compra, etc.).
+
+3. DECISIONES TECNICAS
+  - Se uso Serenity BDD + Cucumber + Screenplay para separar responsabilidades:
+    userinterfaces (locators), tasks (acciones de negocio), questions (verificaciones),
+    models (datos) e interactions (alertas y esperas).
+  - Se usaron esperas explicitas (no pausas fijas) para reducir pruebas inestables.
+  - Los datos de compra se externalizaron en CSV y la URL es configurable por parametro.
+  - Se detecto que desde Serenity 5 el plugin de reportes de Cucumber cambio de paquete
+    (net.serenitybdd.cucumber.core.plugin), y que el runner usa JUnit 5.
+
+4. CONSIDERACIONES
+  - El sitio es publico y de demostracion: su disponibilidad y velocidad pueden variar.
+  - Los locators se basan en texto e ids del sitio; un cambio en el HTML podria romperlos.
+  - Los nombres de producto del feature deben coincidir exactamente con los del sitio.
+
+5. MEJORAS SUGERIDAS
+  - Agregar escenarios negativos (formulario sin datos, carrito vacio).
+  - Ejecucion en CI con Chrome headless.
+  - Eliminar productos del carrito como limpieza al final del flujo.

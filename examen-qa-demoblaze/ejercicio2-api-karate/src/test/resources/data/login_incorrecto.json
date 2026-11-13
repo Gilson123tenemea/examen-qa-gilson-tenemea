@@ -1,0 +1,4 @@
+[
+  { "caso": "clave numerica corta", "claveIncorrecta": "123" },
+  { "caso": "clave alfanumerica distinta", "claveIncorrecta": "ClaveIncorrecta999" }
+]

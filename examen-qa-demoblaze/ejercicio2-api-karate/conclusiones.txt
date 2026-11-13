@@ -1,0 +1,56 @@
+CONCLUSIONES - EJERCICIO 2 (API DEMOBLAZE)
+
+
+1. RESULTADO DE LA EJECUCION
+  - Escenarios ejecutados: [6]   Pasados: [6]   Fallidos: [0]
+  - Ejecuciones realizadas: [N], todas estables
+
+2. ENTRADAS Y SALIDAS CAPTURADAS (prueba manual desde el portal, DevTools > Network)
+
+  Caso 1 - Signup con usuario nuevo
+    POST https://api.demoblaze.com/signup
+    Entrada: {"username":"Gilson","password":"MTIzNDU="}
+    Salida:  Status 200 OK | cuerpo: ""
+
+  Caso 2 - Signup con usuario ya existente
+    POST https://api.demoblaze.com/signup
+    Entrada: {"username":"Gilsont","password":"MjAyMA=="}
+    Salida:  Status 200 OK | cuerpo: {"errorMessage":"This user already exist."}
+
+  Caso 3 - Login con usuario y password correctos
+    POST https://api.demoblaze.com/login
+    Entrada: {"username":"Gilson","password":"MTIzNDU="}
+    Salida:  Status 200 OK | cuerpo: "Auth_token: R2lsc29uMTc5NTE0Ng=="
+
+  Caso 4 - Login con password incorrecto
+    POST https://api.demoblaze.com/login
+    Entrada: {"username":"Gilson","password":"MTIz"}
+    Salida:  Status 200 OK | cuerpo: {"errorMessage":"Wrong password."}
+
+  En la automatizacion los usuarios se generan con nombre unico en cada ejecucion
+  y las claves se toman de los archivos CSV y JSON.
+
+3. HALLAZGOS SOBRE LA API
+  - Los errores de negocio (usuario duplicado, password incorrecto) responden
+    con status 200 y el error viaja en el cuerpo (errorMessage). Por eso las
+    pruebas validan el cuerpo y no solo el codigo HTTP.
+  - La contrasena se envia codificada en Base64 (ej.: "MTIzNDU=" equivale a "12345").
+    Base64 es una codificacion reversible, no un cifrado.
+  - El token de login ("Auth_token") es el Base64 del nombre de usuario seguido de
+    un numero (R2lsc29uMTc5NTE0Ng== decodifica a Gilson1795146). No parece un token
+    firmado (como un JWT), por lo que seria predecible.
+  - El signup exitoso devuelve un cuerpo vacio, sin mensaje de confirmacion.
+  - El mensaje de usuario duplicado tiene un error gramatical ("This user already exist.").
+
+4. CONSIDERACIONES
+  - Es una API publica compartida: los usuarios creados quedan persistidos, por lo
+    que las pruebas usan nombres unicos con marca de tiempo.
+  - Las validaciones dependen del texto exacto de los mensajes; un cambio de
+    redaccion en la API haria fallar las pruebas.
+  - No se probo el login con un usuario inexistente porque no estaba en el alcance.
+
+5. MEJORAS SUGERIDAS
+  - Que la API use codigos HTTP acordes (por ejemplo 409 para duplicado y 401 para
+    credenciales invalidas).
+  - Agregar casos negativos adicionales: campos vacios, usuario inexistente, caracteres especiales.
+  - Ejecutar las pruebas en CI y publicar el reporte como artefacto.
